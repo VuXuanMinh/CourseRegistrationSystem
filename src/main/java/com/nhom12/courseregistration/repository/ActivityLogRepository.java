@@ -1,0 +1,15 @@
+package com.nhom12.courseregistration.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.nhom12.courseregistration.entity.ActivityLog;
+
+@Repository
+public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> {
+    
+    // ĐÃ SỬA: Đổi CreatedAt thành ActionTime
+    List<ActivityLog> findAllByOrderByActionTimeDesc();
+}

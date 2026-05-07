@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-on-surface">Quản lý Học kỳ</h2>
+                <p class="font-body-md text-on-surface-variant mt-xs">Thiết lập các mốc thời gian học thuật cho toàn trường.</p>
+            </div>
+            <button onclick="openModal(false)" class="bg-primary text-white px-lg py-2 rounded-lg font-label-md flex items-center gap-xs shadow-md hover:bg-primary-container transition-all">
+                <span class="material-symbols-outlined">add</span> Thêm học kỳ
+            </button>
+        </div>
+
+        <div class="flex border-b border-outline-variant mb-lg overflow-x-auto">
+            <a th:href="@{/staff/registration/courses}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary whitespace-nowrap">Môn học</a>
+            <a th:href="@{/staff/registration/class-sections}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary whitespace-nowrap">Lớp học phần</a>
+            <a th:href="@{/staff/registration/semesters}" class="px-md py-sm font-label-md text-primary border-b-2 border-primary whitespace-nowrap">Học kỳ</a>
+            <a th:href="@{/staff/registration/plans}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary whitespace-nowrap">Đợt đăng ký</a>
+            <a th:href="@{/staff/registration/results}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary whitespace-nowrap">Kết quả ĐK</a>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden">
+            <table class="w-full text-left border-collapse table-auto">
+                <thead>
+                    <tr class="bg-surface-container border-b border-outline-variant">
+                        <th class="p-md text-on-surface-variant w-16 text-center">STT</th>
+                        <th class="p-md text-on-surface-variant text-left">Tên Học Kỳ</th>
+                        <th class="p-md text-on-surface-variant text-left">Năm học</th>
+                        <th class="p-md text-on-surface-variant text-left">Ngày bắt đầu</th>
+                        <th class="p-md text-on-surface-variant text-left">Ngày kết thúc</th>
+                        <th class="p-md text-on-surface-variant text-center">Trạng thái</th>
+                        <th class="p-md text-on-surface-variant text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/50">
+                    <tr th:each="sem, iter : ${semesters}" class="hover:bg-surface-container-lowest transition-colors">
+                        <td class="p-md text-center text-on-surface-variant" th:text="${iter.count}">1</td>
+                        <td class="p-md text-left font-bold text-[#021541]" th:text="${sem.semesterName}">Học kỳ</td>
+                        <td class="p-md text-left" th:text="${sem.academicYear}">Năm học</td>
+                        <td class="p-md text-left" th:text="${#temporals.format(sem.startDate, 'dd/MM/yyyy')}">Bắt đầu</td>
+                        <td class="p-md text-left" th:text="${#temporals.format(sem.endDate, 'dd/MM/yyyy')}">Kết thúc</td>
+                        <td class="p-md text-center">
+                            <span class="px-2 py-1 rounded bg-green-100 text-green-800 text-xs font-bold" th:text="${sem.semesterStatus}">ACTIVE</span>
+                        </td>
+                        <td class="p-md text-right">
+                            <div class="flex justify-end gap-2">
+                                <button type="button" class="p-1.5 hover:text-primary transition-all"><span class="material-symbols-outlined">edit</span></button>
+                                <a th:href="@{/staff/registration/semesters/delete(id=${sem.id})}" onclick="return confirm('Xóa học kỳ này?')" class="p-1.5 hover:text-error transition-all"><span class="material-symbols-outlined">delete</span></a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(semesters)}">
+                        <td colspan="7" class="p-10 text-center text-gray-500">Chưa có dữ liệu học kỳ.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="crudModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60" onclick="closeModal()"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 z-50 overflow-hidden relative">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-primary" id="modalTitle">Thêm Học Kỳ</h3>
+                <button onclick="closeModal()"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form th:action="@{/staff/registration/semesters/save}" method="post" class="p-6">
+                <input type="hidden" name="id" id="formId"/>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Mã Học kỳ</label>
+                            <input type="text" name="semesterCode" class="w-full border p-2 rounded-lg" placeholder="VD: HK1_2425" required/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Tên Học kỳ</label>
+                            <input type="text" name="semesterName" class="w-full border p-2 rounded-lg" placeholder="VD: Học kỳ 1" required/>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-1">Năm học</label>
+                        <input type="text" name="academicYear" class="w-full border p-2 rounded-lg" placeholder="VD: 2024-2025" required/>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Ngày bắt đầu</label>
+                            <input type="date" name="startDate" class="w-full border p-2 rounded-lg" required/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Ngày kết thúc</label>
+                            <input type="date" name="endDate" class="w-full border p-2 rounded-lg" required/>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t">
+                    <button type="button" onclick="closeModal()" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Hủy</button>
+                    <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg font-bold shadow-md">Lưu dữ liệu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
+        function openModal() { 
+            document.getElementById('crudModal').style.display = 'flex'; 
+            document.getElementById('formId').value = ""; 
+            document.querySelector('form').reset(); 
+        }
+    </script>
+</body>
+</html>

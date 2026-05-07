@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-on-surface">Quản lý Tài khoản</h2>
+                <p class="font-body-md text-on-surface-variant mt-xs">Cấp phát quyền truy cập cho Sinh viên và Cán bộ.</p>
+            </div>
+            <button onclick="openModal()" class="bg-primary text-white hover:bg-primary-container px-lg py-2 rounded-lg font-label-md flex items-center gap-xs shadow-md">
+                <span class="material-symbols-outlined">add</span> Cấp tài khoản
+            </button>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden mt-6">
+            <table class="w-full text-left border-collapse table-auto">
+                <thead>
+                    <tr class="bg-surface-container border-b border-outline-variant">
+                        <th class="p-md font-label-sm text-on-surface-variant w-16 text-center">STT</th>
+                        <th class="p-md font-label-sm text-on-surface-variant text-left">Tên đăng nhập</th>
+                        <th class="p-md font-label-sm text-on-surface-variant text-left">Chủ sở hữu (Sinh viên)</th>
+                        <th class="p-md font-label-sm text-on-surface-variant text-center">Vai trò</th>
+                        <th class="p-md font-label-sm text-on-surface-variant text-center">Trạng thái</th>
+                        <th class="p-md font-label-sm text-on-surface-variant text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/50">
+                    <tr th:each="acc, iter : ${accounts}" class="hover:bg-surface-container-lowest transition-colors">
+                        <td class="p-md text-center text-on-surface-variant" th:text="${iter.count}">1</td>
+                        <td class="p-md font-bold text-primary" th:text="${acc.username}">SV001</td>
+                        <td class="p-md text-left">
+                            <div th:if="${acc.student != null}">
+                                <div class="font-bold" th:text="${acc.student.fullName}">Nguyễn Văn A</div>
+                                <div class="text-xs text-gray-500" th:text="${acc.student.curriculum != null ? acc.student.curriculum.curriculumName : ''}">Ngành</div>
+                            </div>
+                            <div th:if="${acc.student == null}" class="text-gray-400 italic">Nhân viên / Quản trị</div>
+                        </td>
+                        <td class="p-md text-center">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800" th:text="${acc.role}">STUDENT</span>
+                        </td>
+                        <td class="p-md text-center">
+                            <span th:if="${acc.accountStatus == 'ACTIVE'}" class="text-green-600 font-bold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">check_circle</span> Hoạt động</span>
+                            <span th:unless="${acc.accountStatus == 'ACTIVE'}" class="text-red-600 font-bold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">cancel</span> Bị khóa</span>
+                        </td>
+                        <td class="p-md text-right">
+                            <a th:href="@{/staff/accounts/delete(id=${acc.id})}" onclick="return confirm('Xóa/Khóa tài khoản này?')" class="p-1.5 text-on-surface-variant hover:text-error transition-colors">
+                                <span class="material-symbols-outlined">delete</span>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="crudModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-gray-900 bg-opacity-50" onclick="closeModal()"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 z-50 overflow-hidden relative border border-gray-200">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-primary">Cấp tài khoản mới</h3>
+                <button type="button" onclick="closeModal()" class="text-gray-400"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            
+            <form th:action="@{/staff/accounts/save}" method="post" class="p-6">
+                <input type="hidden" name="id" id="formId"/>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Vai trò</label>
+                        <select name="role" id="acc_role" class="w-full border px-4 py-2 rounded-lg" onchange="toggleStudentSelect()" required>
+                            <option value="STUDENT">Sinh viên (STUDENT)</option>
+                            <option value="STAFF">Nhân viên Đào tạo (STAFF)</option>
+                            <option value="ADMIN">Quản trị viên (ADMIN)</option>
+                        </select>
+                    </div>
+
+                    <div id="student_select_div">
+                        <label class="block text-sm font-semibold mb-1 text-primary">Gắn với Sinh viên</label>
+                        <select name="student.id" id="acc_student" class="w-full border border-primary px-4 py-2 rounded-lg focus:ring-2">
+                            <option value="">-- Chọn sinh viên chưa có tài khoản --</option>
+                            <option th:each="st : ${students}" th:value="${st.id}" th:text="${st.studentCode + ' - ' + st.fullName}"></option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Tên đăng nhập (Username)</label>
+                        <input type="text" name="username" id="acc_username" class="w-full border px-4 py-2 rounded-lg" required placeholder="Gợi ý: Dùng mã SV làm username"/>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Mật khẩu</label>
+                        <input type="text" name="passwordHash" id="acc_password" class="w-full border px-4 py-2 rounded-lg" required value="123456"/>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Trạng thái</label>
+                        <select name="accountStatus" class="w-full border px-4 py-2 rounded-lg" required>
+                            <option value="ACTIVE">Cho phép hoạt động (ACTIVE)</option>
+                            <option value="INACTIVE">Khóa tài khoản (INACTIVE)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-6 mt-6 border-t">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-lg border">Hủy</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-lg bg-primary text-white font-medium shadow-md">Lưu tài khoản</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
+        function openModal() { document.getElementById('crudModal').style.display = 'flex'; }
+        
+        // Ẩn/Hiện ô chọn sinh viên tùy theo Vai trò
+        function toggleStudentSelect() {
+            var role = document.getElementById("acc_role").value;
+            var studentDiv = document.getElementById("student_select_div");
+            var studentInput = document.getElementById("acc_student");
+            
+            if (role === "STUDENT") {
+                studentDiv.style.display = "block";
+                studentInput.required = true;
+            } else {
+                studentDiv.style.display = "none";
+                studentInput.required = false;
+                studentInput.value = ""; // Clear giá trị nếu chọn STAFF
+            }
+        }
+    </script>
+</body>
+</html>

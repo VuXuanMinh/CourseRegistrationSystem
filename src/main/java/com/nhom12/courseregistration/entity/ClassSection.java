@@ -9,6 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -58,6 +60,9 @@ public class ClassSection {
     @ManyToOne
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
+    @ManyToOne
+    @JoinColumn(name = "registration_plan_id")
+    private RegistrationPlan registrationPlan;
 
     // --- GETTER VÀ SETTER ---
     public Long getId() { return id; }
@@ -98,4 +103,17 @@ public class ClassSection {
 
     public Semester getSemester() { return semester; }
     public void setSemester(Semester semester) { this.semester = semester; }
+    public RegistrationPlan getRegistrationPlan() { return registrationPlan; }
+    public void setRegistrationPlan(RegistrationPlan plan) { this.registrationPlan = plan; }
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Tự động cập nhật thời gian khi có thay đổi
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
 }

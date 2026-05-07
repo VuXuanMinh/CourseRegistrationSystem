@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-display-sm text-on-surface">Quản lý Sinh viên</h2>
+                <p class="font-body-md text-body-md text-on-surface-variant mt-xs">Quản lý thông tin chi tiết, thêm mới hoặc cập nhật hồ sơ sinh viên.</p>
+            </div>
+            <button onclick="openModal(false)" class="bg-primary text-on-primary hover:bg-primary-container px-lg py-2 rounded-lg font-label-md text-label-md flex items-center gap-xs transition-colors card-shadow">
+                <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                Thêm mới
+            </button>
+        </div>
+
+        <div class="flex border-b border-outline-variant mb-lg overflow-x-auto">
+            <a th:href="@{/staff/faculties}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-all whitespace-nowrap">Khoa</a>
+            <a th:href="@{/staff/majors}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-all whitespace-nowrap">Ngành</a>
+            <a th:href="@{/staff/students}" class="px-md py-sm font-label-md text-primary border-b-2 border-primary transition-all whitespace-nowrap">Sinh viên</a>
+            <a th:href="@{/staff/lecturers}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-all whitespace-nowrap">Giảng viên</a>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse table-auto">
+                    <thead>
+                        <tr class="bg-surface-container border-b border-outline-variant">
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant w-16 text-center">STT</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-left">Họ và Tên</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-left">Mã số</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-left">Khóa</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-left">Lớp</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-left">Số điện thoại</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-left">Khoa trực thuộc</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-center">Trạng thái</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/50">
+                        <tr th:each="student, iter : ${students}" class="hover:bg-surface-container-lowest transition-colors" th:classappend="${iter.count % 2 == 0} ? 'bg-surface/50' : ''">
+                            <td class="p-md font-body-sm text-body-sm text-on-surface-variant text-center" th:text="${iter.count}">1</td>
+                            <td class="p-md text-left">
+                                <div class="flex items-center gap-sm">
+                                    <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-sm font-bold" th:text="${student.fullName != null ? #strings.substring(student.fullName, 0, 1).toUpperCase() : 'S'}">S</div>
+                                    <div class="whitespace-nowrap">
+                                        <div class="font-label-md text-label-md text-on-surface" th:text="${student.fullName}">Tên</div>
+                                        <div class="font-body-sm text-body-sm text-on-surface-variant" th:text="${student.email}">email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-md font-body-md text-body-md text-on-surface text-left" th:text="${student.studentCode}">SV001</td>
+                            <td class="p-md font-body-md text-body-md text-on-surface text-left" th:text="${student.cohort}">K18</td>
+                            <td class="p-md font-body-md text-body-md text-on-surface text-left" th:text="${student.className}">Lớp</td>
+                            <td class="p-md font-body-md text-body-md text-on-surface text-left" th:text="${student.phone}">SĐT</td>
+                            <td class="p-md font-body-md text-body-md text-on-surface text-left font-bold text-primary" th:text="${student.faculty != null ? student.faculty.facultyName : 'N/A'}">Khoa</td>
+                            <td class="p-md text-center">
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-variant text-on-surface font-label-sm text-label-sm">
+                                    <span class="w-2 h-2 rounded-full" th:classappend="${student.academicStatus == 'ACTIVE' ? 'bg-secondary' : 'bg-outline'}"></span>
+                                    <span th:text="${student.academicStatus == 'ACTIVE' ? 'Đang học' : 'Bảo lưu'}">Trạng thái</span>
+                                </span>
+                            </td>
+                            <td class="p-md text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button" 
+                                            th:data-id="${student.id}" 
+                                            th:data-code="${student.studentCode}" 
+                                            th:data-name="${student.fullName}" 
+                                            th:data-email="${student.email}" 
+                                            th:data-phone="${student.phone}"
+                                            th:data-class="${student.className}"
+                                            th:data-cohort="${student.cohort}"
+                                            th:data-fac="${student.faculty != null ? student.faculty.id : ''}"
+                                            th:data-curr="${student.curriculum != null ? student.curriculum.id : ''}"
+                                            onclick="editStudent(this)" 
+                                            class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded transition-colors">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">edit</span>
+                                    </button>
+                                    <a th:href="@{/staff/students/delete(id=${student.id})}" onclick="return confirm('Xóa sinh viên này?')" class="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container rounded transition-colors">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-md border-t border-outline-variant flex items-center justify-between bg-surface-container-lowest">
+                <div class="font-body-sm text-body-sm text-on-surface-variant">Tổng cộng: <span th:text="${students.size()}">0</span> kết quả</div>
+            </div>
+        </div>
+    </main>
+
+    <div id="crudModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-gray-900 bg-opacity-50" onclick="closeModal()"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 z-50 overflow-hidden relative border border-gray-200">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-[#021541]" id="modalTitle">Thêm sinh viên</h3>
+                <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-700">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <form th:action="@{/staff/students/save}" method="post" class="p-6">
+                <input type="hidden" name="id" id="formId"/>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold text-[#021541] mb-1">Mã sinh viên (Bắt buộc)</label>
+                        <input type="text" name="studentCode" id="std_code" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#021541]" required/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold text-[#021541] mb-1">Họ tên (Bắt buộc)</label>
+                        <input type="text" name="fullName" id="std_name" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#021541]" required/>
+                    </div>
+
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold text-[#021541] mb-1">Email (Bắt buộc)</label>
+                        <input type="email" name="email" id="std_email" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#021541]" required/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold text-[#021541] mb-1">Số điện thoại</label>
+                        <input type="text" name="phone" id="std_phone" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#021541]"/>
+                    </div>
+
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold text-[#021541] mb-1">Khóa (Bắt buộc)</label>
+                        <input type="text" name="cohort" id="std_cohort" placeholder="VD: K2023" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#021541]" required/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold text-[#021541] mb-1">Lớp hành chính</label>
+                        <input type="text" name="className" id="std_class" placeholder="VD: CNTT1" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#021541]"/>
+                    </div>
+
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold text-[#021541] mb-1">Khoa trực thuộc</label>
+                        <select name="faculty.id" id="std_fac" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#021541]">
+                            <option value="">-- Chọn Khoa --</option>
+                            <option th:if="${faculties != null}" th:each="f : ${faculties}" th:value="${f.id}" th:text="${f.facultyName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold text-[#021541] mb-1">Ngành/CTĐT (Bắt buộc)</label>
+                        <select name="curriculum.id" id="std_curr" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#021541]" required>
+                            <option value="">-- Chọn Ngành --</option>
+                            <option th:if="${curriculums != null}" th:each="c : ${curriculums}" th:value="${c.id}" th:text="${c.curriculumName}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">Hủy</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#021541] text-white font-medium hover:bg-blue-900 shadow-md transition-colors">Lưu dữ liệu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function closeModal() {
+            document.getElementById('crudModal').style.display = 'none';
+        }
+
+        function openModal(isEdit) {
+            document.getElementById('crudModal').style.display = 'flex';
+            document.getElementById('modalTitle').innerText = isEdit ? "Cập nhật sinh viên" : "Thêm sinh viên";
+            if (!isEdit) {
+                document.getElementById('formId').value = "";
+                document.querySelector('form').reset(); 
+            }
+        }
+
+        function editStudent(btn) {
+            openModal(true);
+            document.getElementById('formId').value = btn.getAttribute('data-id');
+            document.getElementById('std_code').value = btn.getAttribute('data-code');
+            document.getElementById('std_name').value = btn.getAttribute('data-name');
+            document.getElementById('std_email').value = btn.getAttribute('data-email');
+            
+            // Map các trường mới thêm
+            document.getElementById('std_phone').value = btn.getAttribute('data-phone');
+            document.getElementById('std_class').value = btn.getAttribute('data-class');
+            document.getElementById('std_cohort').value = btn.getAttribute('data-cohort');
+            
+            if(btn.getAttribute('data-fac')) {
+                document.getElementById('std_fac').value = btn.getAttribute('data-fac');
+            }
+            if(btn.getAttribute('data-curr')) {
+                document.getElementById('std_curr').value = btn.getAttribute('data-curr');
+            }
+        }
+    </script>
+</body>
+</html>

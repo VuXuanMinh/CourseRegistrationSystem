@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-on-surface">Nhật ký Hệ thống</h2>
+                <p class="font-body-md text-on-surface-variant mt-xs">Lưu vết toàn bộ hoạt động Thêm, Sửa, Xóa và Đăng nhập dựa trên dữ liệu hệ thống.</p>
+            </div>
+            <button class="bg-surface-container-low text-primary border border-outline-variant hover:bg-surface-container px-lg py-2 rounded-lg font-label-md flex items-center gap-xs shadow-sm transition-colors">
+                <span class="material-symbols-outlined">filter_list</span> Bộ lọc
+            </button>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden mt-6">
+            <table class="w-full text-left border-collapse table-auto">
+                <thead>
+                    <tr class="bg-surface-container border-b border-outline-variant">
+                        <th class="p-md font-label-sm text-on-surface-variant w-48 text-left">Thời gian</th>
+                        <th class="p-md font-label-sm text-on-surface-variant text-left">Người thực hiện</th>
+                        <th class="p-md font-label-sm text-on-surface-variant text-center w-32">Thao tác</th>
+                        <th class="p-md font-label-sm text-on-surface-variant text-left">Chi tiết & Địa chỉ IP</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/50">
+                    <tr th:each="log : ${logs}" class="hover:bg-surface-container-lowest transition-colors">
+                        <td class="p-md text-sm text-gray-600 font-medium" 
+                            th:text="${log.actionTime != null ? #temporals.format(log.actionTime, 'dd/MM/yyyy HH:mm:ss') : 'N/A'}">Thời gian</td>
+                        
+                        <td class="p-md">
+                            <div class="font-bold text-primary">ID: <span th:text="${log.userId}">0</span></div>
+                            <div class="text-xs text-gray-500" th:text="${log.userType}">ROLE</div>
+                        </td>
+                        
+                        <td class="p-md text-center">
+                            <span class="px-2 py-1 rounded text-xs font-bold"
+                                  th:classappend="${log.action == 'CREATE' or log.action == 'REGISTER'} ? 'bg-green-100 text-green-800' : 
+                                                (${log.action == 'UPDATE' or log.action == 'LOGIN'} ? 'bg-blue-100 text-blue-800' : 
+                                                (${log.action == 'DELETE'} ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800'))"
+                                  th:text="${log.action}">ACTION</span>
+                        </td>
+                        
+                        <td class="p-md text-on-surface text-sm">
+                            <div th:text="${log.detailData}">Chi tiết thao tác</div>
+                            <div class="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                                <span class="material-symbols-outlined" style="font-size: 12px;">lan</span>
+                                IP: <span th:text="${log.ipAddress}">127.0.0.1</span>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr th:if="${#lists.isEmpty(logs)}">
+                        <td colspan="4" class="p-10 text-center text-gray-500 font-body-md italic">Chưa có bản ghi nhật ký nào trong hệ thống.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="p-md border-t text-sm text-gray-500 bg-surface-container-lowest">
+                Tổng cộng: <span th:text="${logs != null ? logs.size() : 0}">0</span> hoạt động đã được ghi lại.
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-on-surface">Quản lý Lớp học phần</h2>
+                <p class="font-body-md text-on-surface-variant mt-xs">Mở lớp, phân công giảng viên và xếp thời khóa biểu.</p>
+            </div>
+            <button onclick="openModal(false)" class="bg-primary text-white px-lg py-2 rounded-lg font-label-md flex items-center gap-xs shadow-md hover:bg-primary-container transition-all">
+                <span class="material-symbols-outlined">add</span> Mở lớp mới
+            </button>
+        </div>
+
+        <div class="flex border-b border-outline-variant mb-lg overflow-x-auto">
+            <a th:href="@{/staff/registration/courses}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary whitespace-nowrap">Môn học</a>
+            <a th:href="@{/staff/registration/class-sections}" class="px-md py-sm font-label-md text-primary border-b-2 border-primary whitespace-nowrap">Lớp học phần</a>
+            <a th:href="@{/staff/registration/semesters}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary whitespace-nowrap">Học kỳ</a>
+            <a th:href="@{/staff/registration/plans}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary whitespace-nowrap">Đợt đăng ký</a>
+            <a th:href="@{/staff/registration/results}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary whitespace-nowrap">Kết quả ĐK</a>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden">
+            <table class="w-full text-left border-collapse table-auto">
+                <thead>
+                    <tr class="bg-surface-container border-b border-outline-variant">
+                        <th class="p-md text-on-surface-variant text-left">Mã LHP</th>
+                        <th class="p-md text-on-surface-variant text-left">Môn học & Loại</th>
+                        <th class="p-md text-on-surface-variant text-left">Giảng viên</th>
+                        <th class="p-md text-on-surface-variant text-left">Lịch học / Địa điểm</th>
+                        <th class="p-md text-on-surface-variant text-center">Sĩ số</th>
+                        <th class="p-md text-on-surface-variant text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/50">
+                    <tr th:each="section : ${classSections}" class="hover:bg-surface-container-low transition-colors">
+                        <td class="p-md font-bold text-primary" th:text="${section.sectionCode}">LHP001</td>
+                        <td class="p-md">
+                            <div class="font-medium" th:text="${section.course != null ? section.course.courseName : 'N/A'}">Tên môn</div>
+                        </td>
+                        <td class="p-md text-sm" th:text="${section.lecturer != null ? section.lecturer.fullName : 'Chưa phân công'}">GV</td>
+                        <td class="p-md text-sm">
+                            <div th:text="${section.scheduleInfo}">Thứ 2 (1-3)</div>
+                            <div class="text-xs text-secondary" th:text="${section.classroom}">Phòng A101</div>
+                        </td>
+                        <td class="p-md text-center text-sm">
+                            <span th:text="${section.currentCapacity}">0</span>/<span th:text="${section.maxCapacity}">40</span>
+                        </td>
+                        <td class="p-md text-right">
+                            <button type="button" 
+                                    th:data-id="${section.id}"
+                                    th:data-code="${section.sectionCode}"
+                                    th:data-course="${section.course != null ? section.course.id : ''}"
+                                    th:data-type="${section.sectionType}"
+                                    th:data-semester="${section.semester != null ? section.semester.id : ''}"
+                                    th:data-lecturer="${section.lecturer != null ? section.lecturer.id : ''}"
+                                    th:data-schedule="${section.scheduleInfo}"
+                                    th:data-room="${section.classroom}"
+                                    th:data-capacity="${section.maxCapacity}"
+                                    th:data-plan="${section.registrationPlan != null ? section.registrationPlan.id : ''}"
+                                    onclick="editClassSection(this)" 
+                                    class="p-1.5 hover:text-primary transition-all">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="crudModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60" onclick="closeModal()"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 z-50 overflow-hidden relative">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                <h3 id="modalTitle" class="text-xl font-bold text-primary">Mở Lớp Học Phần Mới</h3>
+                <button onclick="closeModal()"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            
+            <form th:action="@{/staff/registration/class-sections/save}" method="post" class="p-6">
+                <input type="hidden" name="id" id="formId"/>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Mã lớp học phần</label>
+                        <input type="text" name="sectionCode" id="sec_code" class="w-full border p-2 rounded-lg" required placeholder="VD: LHP2024_01"/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Môn học</label>
+                        <select name="course.id" id="sec_course" class="w-full border p-2 rounded-lg">
+                            <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.courseName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Loại lớp học phần</label>
+                        <select name="sectionType" id="sec_type" class="w-full border p-2 rounded-lg" required>
+                            <option value="Lý thuyết">Lý thuyết</option>
+                            <option value="Thực hành">Thực hành</option>
+                            <option value="Đồ án/Thực tập">Đồ án/Thực tập</option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Học kỳ</label>
+                        <select name="semester.id" id="sec_semester" class="w-full border p-2 rounded-lg">
+                            <option th:each="s : ${semesters}" th:value="${s.id}" th:text="${s.semesterName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Giảng viên</label>
+                        <select name="lecturer.id" id="sec_lecturer" class="w-full border p-2 rounded-lg">
+                            <option value="">-- Chọn giảng viên --</option>
+                            <option th:each="l : ${lecturers}" th:value="${l.id}" th:text="${l.fullName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Lịch học</label>
+                        <input type="text" name="scheduleInfo" id="sec_schedule" class="w-full border p-2 rounded-lg" placeholder="VD: Thứ 2 (Tiết 1-3)"/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Phòng học / Địa điểm</label>
+                        <input type="text" name="classroom" id="sec_room" class="w-full border p-2 rounded-lg" placeholder="VD: A1.202"/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Sĩ số tối đa</label>
+                        <input type="number" name="maxCapacity" id="sec_capacity" class="w-full border p-2 rounded-lg" value="40"/>
+                    </div>
+                </div>
+                <div class="col-span-2 mt-4">
+                    <label class="block text-sm font-bold mb-1 text-secondary">Thuộc đợt đăng ký (Tùy chọn)</label>
+                    <select name="registrationPlan.id" id="sec_plan" class="w-full border border-secondary p-2 rounded-lg focus:ring-2 focus:ring-secondary outline-none">
+                        <option value="">-- Chọn đợt đăng ký để gán lớp --</option>
+                        <option th:each="p : ${plans}" 
+                                th:value="${p.id}" 
+                                th:text="${p.planName + ' (' + p.semester.semesterName + ')'}">
+                        </option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t">
+                    <button type="button" onclick="closeModal()" class="px-6 py-2 border rounded-lg">Hủy</button>
+                    <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg font-bold shadow-md">Lưu lớp học</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function closeModal() { 
+            document.getElementById('crudModal').style.display = 'none'; 
+        }
+        
+        function openModal(isEdit = false) { 
+            document.getElementById('crudModal').style.display = 'flex'; 
+            document.getElementById('modalTitle').innerText = isEdit ? "Cập nhật Lớp học phần" : "Mở Lớp Học Phần Mới";
+            if(!isEdit) {
+                document.getElementById('formId').value = "";
+                document.querySelector('form').reset();
+            }
+        }
+
+        function editClassSection(btn) {
+            openModal(true);
+            document.getElementById('formId').value = btn.getAttribute('data-id');
+            document.getElementById('sec_code').value = btn.getAttribute('data-code');
+            document.getElementById('sec_course').value = btn.getAttribute('data-course');
+            document.getElementById('sec_type').value = btn.getAttribute('data-type');
+            document.getElementById('sec_semester').value = btn.getAttribute('data-semester');
+            document.getElementById('sec_lecturer').value = btn.getAttribute('data-lecturer');
+            document.getElementById('sec_schedule').value = btn.getAttribute('data-schedule');
+            document.getElementById('sec_room').value = btn.getAttribute('data-room');
+            document.getElementById('sec_capacity').value = btn.getAttribute('data-capacity');
+            document.getElementById('sec_plan').value = btn.getAttribute('data-plan');
+        }
+    </script>
+</body>
+</html>

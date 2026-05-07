@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-on-surface">Kết quả Đăng ký</h2>
+                <p class="font-body-md text-on-surface-variant mt-xs">Theo dõi và xử lý kết quả đăng ký môn học của sinh viên.</p>
+            </div>
+            <button class="bg-green-600 text-white px-lg py-2 rounded-lg font-label-md flex items-center gap-xs shadow-md hover:bg-green-700 transition-colors">
+                <span class="material-symbols-outlined">download</span> Xuất danh sách
+            </button>
+        </div>
+
+        <div class="flex border-b border-outline-variant mb-lg overflow-x-auto">
+            <a th:href="@{/staff/registration/courses}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary">Môn học</a>
+            <a th:href="@{/staff/registration/class-sections}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary">Lớp học phần</a>
+            <a th:href="@{/staff/registration/plans}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary">Đợt đăng ký</a>
+            <a th:href="@{/staff/registration/results}" class="px-md py-sm font-label-md text-primary border-b-2 border-primary">Kết quả ĐK</a>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl p-card_padding border border-outline-variant card-shadow mb-lg">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-md items-end">
+                <div class="md:col-span-4">
+                    <label class="block font-label-sm text-on-surface-variant mb-xs">Mã Sinh viên</label>
+                    <input class="w-full border border-outline-variant px-4 py-2 rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="Nhập mã SV..." type="text"/>
+                </div>
+                <div class="md:col-span-5">
+                    <label class="block font-label-sm text-on-surface-variant mb-xs">Lớp học phần</label>
+                    <select class="w-full border border-outline-variant px-4 py-2 rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                        <option value="">-- Tất cả Lớp học phần --</option>
+                        <option th:if="${classSections != null}" th:each="cs : ${classSections}" th:value="${cs.id}" th:text="${cs.sectionCode + ' - ' + cs.course.courseName}"></option>
+                    </select>
+                </div>
+                <div class="md:col-span-3 flex justify-end">
+                    <button class="bg-surface-container-low text-primary hover:bg-surface-container px-md py-2 rounded-lg font-label-md flex items-center gap-xs border border-outline-variant w-full justify-center transition-colors">
+                        <span class="material-symbols-outlined">filter_list</span> Lọc kết quả
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden">
+            <table class="w-full text-left border-collapse table-auto">
+                <thead>
+                    <tr class="bg-surface-container border-b border-outline-variant">
+                        <th class="p-md text-on-surface-variant w-16 text-center">STT</th>
+                        <th class="p-md text-on-surface-variant text-left">Thông tin Sinh viên</th>
+                        <th class="p-md text-on-surface-variant text-left">Lớp học phần</th>
+                        <th class="p-md text-on-surface-variant text-left">Thời gian ĐK</th>
+                        <th class="p-md text-on-surface-variant text-center">Trạng thái</th>
+                        <th class="p-md text-on-surface-variant text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/50">
+                    <tr th:each="reg, iter : ${registrations}" class="hover:bg-surface-container-lowest transition-colors">
+                        <td class="p-md text-center text-on-surface-variant" th:text="${iter.count}">1</td>
+                        
+                        <td class="p-md text-left">
+                            <div class="font-bold text-[#021541]" th:text="${reg.student?.studentCode ?: 'SV-NULL'}">SV001</div>
+                            <div class="text-sm text-gray-700" th:text="${reg.student?.fullName ?: 'N/A'}">Nguyễn Văn A</div>
+                        </td>
+                        
+                        <td class="p-md text-left">
+                            <div class="font-bold text-on-surface" th:text="${reg.section?.sectionCode ?: 'LHP-NULL'}">142512</div>
+                            <div class="text-xs text-gray-500" th:text="${reg.section?.course?.courseName ?: 'Học phần đã xóa'}">Cấu trúc dữ liệu</div>
+                        </td>
+                        
+                        <td class="p-md text-left text-sm text-gray-600">
+                            <span th:text="${reg.registrationTime != null ? #temporals.format(reg.registrationTime, 'dd/MM/yyyy HH:mm:ss') : '08/05/2026 14:30:00'}"></span>
+                        </td>
+                        
+                        <td class="p-md text-center">
+                            <span class="px-2 py-1 rounded text-xs font-bold" 
+                                  th:classappend="${reg.registrationStatus == 'SUCCESS'} ? 'bg-green-100 text-green-800' : (${reg.registrationStatus == 'CANCELLED'} ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')"
+                                  th:text="${reg.registrationStatus}">SUCCESS
+                            </span>
+                        </td>
+                        
+                        <td class="p-md text-right">
+                            <a th:if="${reg.registrationStatus != 'CANCELLED'}" th:href="@{/staff/registration/cancel(id=${reg.id})}" onclick="return confirm('Bạn có chắc chắn muốn HỦY đăng ký của sinh viên này?')" class="p-1.5 text-red-600 hover:text-red-800 transition-all">
+                                <span class="material-symbols-outlined">cancel</span>
+                            </a>
+                        </td>
+                    </tr>
+                    
+                    <tr th:if="${#lists.isEmpty(registrations)}">
+                        <td colspan="6" class="p-10 text-center font-body-md text-on-surface-variant">Chưa có dữ liệu đăng ký.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="p-md border-t text-sm text-gray-500 bg-surface-container-lowest">
+                Tổng cộng: <span th:text="${registrations != null ? registrations.size() : 0}">0</span> kết quả.
+            </div>
+        </div>
+    </main>
+</body>
+</html>

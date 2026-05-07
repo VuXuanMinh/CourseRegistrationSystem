@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-display-sm text-on-surface">Quản lý Học phí</h2>
+                <p class="font-body-md text-body-md text-on-surface-variant mt-xs">Theo dõi công nợ, phát hành hóa đơn và thu học phí sinh viên.</p>
+            </div>
+            <button onclick="openModal(false)" class="bg-primary text-on-primary hover:bg-primary-container px-lg py-2 rounded-lg font-label-md text-label-md flex items-center gap-xs transition-colors card-shadow">
+                <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                Tạo hóa đơn
+            </button>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden mt-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse table-auto">
+                    <thead>
+                        <tr class="bg-surface-container border-b border-outline-variant">
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant w-16 text-center">STT</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-left">Mã HĐ</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-left">Thông tin Sinh viên</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-left">Học kỳ</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-center">Tín chỉ</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-right">Tổng tiền (VNĐ)</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-center">Hạn nộp</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-center">Trạng thái</th>
+                            <th class="p-md font-label-sm text-label-sm text-on-surface-variant text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/50">
+                        <tr th:each="t, iter : ${tuitions}" class="hover:bg-surface-container-lowest transition-colors">
+                            <td class="p-md text-center text-on-surface-variant" th:text="${iter.count}">1</td>
+                            <td class="p-md font-bold text-primary" th:text="${t.invoiceCode}">HD001</td>
+                            <td class="p-md text-left">
+                                <div class="font-bold text-on-surface" th:text="${t.student != null ? t.student.studentCode : 'N/A'}">SV001</div>
+                                <div class="text-sm text-gray-600" th:text="${t.student != null ? t.student.fullName : ''}">Nguyễn Văn A</div>
+                            </td>
+                            <td class="p-md" th:text="${t.semester != null ? t.semester.semesterName : 'N/A'}">HK1</td>
+                            <td class="p-md text-center font-bold" th:text="${t.totalCredits}">15</td>
+                            <td class="p-md text-right font-bold text-error" th:text="${#numbers.formatDecimal(t.totalAmount, 0, 'COMMA', 0, 'POINT')}">5,000,000</td>
+                            <td class="p-md text-center text-sm" th:text="${#temporals.format(t.dueDate, 'dd/MM/yyyy HH:mm')}">30/12/2026</td>
+                            <td class="p-md text-center">
+                                <span class="px-2 py-1 rounded text-xs font-bold" 
+                                      th:classappend="${t.paymentStatus == 'PAID'} ? 'bg-green-100 text-green-800' : (${t.paymentStatus == 'UNPAID'} ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')"
+                                      th:text="${t.paymentStatus == 'PAID' ? 'Đã thu' : (t.paymentStatus == 'UNPAID' ? 'Chưa thu' : 'Thu một phần')}">
+                                    Trạng thái
+                                </span>
+                            </td>
+                            <td class="p-md text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button" 
+                                            th:data-id="${t.id}" th:data-code="${t.invoiceCode}" 
+                                            th:data-student="${t.student != null ? t.student.id : ''}"
+                                            th:data-semester="${t.semester != null ? t.semester.id : ''}"
+                                            th:data-credits="${t.totalCredits}" th:data-amount="${t.totalAmount}"
+                                            th:data-status="${t.paymentStatus}" th:data-due="${t.dueDate}"
+                                            onclick="editTuition(this)" 
+                                            class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded transition-colors">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">edit</span>
+                                    </button>
+                                    <a th:href="@{/staff/tuitions/delete(id=${t.id})}" onclick="return confirm('Xóa hóa đơn này?')" class="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container rounded transition-colors">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(tuitions)}">
+                            <td colspan="9" class="p-10 text-center font-body-md text-on-surface-variant">Chưa có hóa đơn học phí nào.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-md border-t border-outline-variant flex items-center justify-between bg-surface-container-lowest">
+                <div class="font-body-sm text-body-sm text-on-surface-variant">Tổng cộng: <span th:text="${tuitions != null ? tuitions.size() : 0}">0</span> kết quả</div>
+            </div>
+        </div>
+    </main>
+
+    <div id="crudModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-gray-900 bg-opacity-50" onclick="closeModal()"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 z-50 overflow-hidden relative border border-gray-200">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-primary" id="modalTitle">Tạo Hóa Đơn Học Phí</h3>
+                <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-700">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <form th:action="@{/staff/tuitions/save}" method="post" class="p-6">
+                <input type="hidden" name="id" id="formId"/>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold mb-1">Mã hóa đơn</label>
+                        <input type="text" name="invoiceCode" id="tui_code" class="w-full border px-4 py-2 rounded-lg" required placeholder="VD: HD2026_001"/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold mb-1">Học kỳ</label>
+                        <select name="semester.id" id="tui_sem" class="w-full border px-4 py-2 rounded-lg" required>
+                            <option th:each="s : ${semesters}" th:value="${s.id}" th:text="${s.semesterName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-semibold mb-1">Sinh viên</label>
+                        <select name="student.id" id="tui_student" class="w-full border px-4 py-2 rounded-lg" required>
+                            <option value="">-- Chọn Sinh Viên --</option>
+                            <option th:each="st : ${students}" th:value="${st.id}" th:text="${st.studentCode + ' - ' + st.fullName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold mb-1">Tổng tín chỉ</label>
+                        <input type="number" name="totalCredits" id="tui_credits" class="w-full border px-4 py-2 rounded-lg" required/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold mb-1 text-error">Tổng số tiền (VNĐ)</label>
+                        <input type="number" step="0.01" name="totalAmount" id="tui_amount" class="w-full border px-4 py-2 rounded-lg" required/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold mb-1">Hạn nộp</label>
+                        <input type="datetime-local" name="dueDate" id="tui_due" class="w-full border px-4 py-2 rounded-lg" required/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-semibold mb-1">Trạng thái thanh toán</label>
+                        <select name="paymentStatus" id="tui_status" class="w-full border px-4 py-2 rounded-lg font-bold" required>
+                            <option value="UNPAID" class="text-red-600">Chưa thu (UNPAID)</option>
+                            <option value="PARTIAL" class="text-yellow-600">Thu một phần (PARTIAL)</option>
+                            <option value="PAID" class="text-green-600">Đã thu đủ (PAID)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-lg border text-gray-700 hover:bg-gray-50">Hủy</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-lg bg-primary text-white font-medium shadow-md">Lưu hóa đơn</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
+        function openModal(isEdit) { 
+            document.getElementById('crudModal').style.display = 'flex'; 
+            document.getElementById('modalTitle').innerText = isEdit ? "Cập nhật Hóa Đơn" : "Tạo Hóa Đơn Học Phí";
+            if (!isEdit) { document.getElementById('formId').value = ""; document.querySelector('form').reset(); }
+        }
+
+        function editTuition(btn) {
+            openModal(true);
+            document.getElementById('formId').value = btn.getAttribute('data-id');
+            document.getElementById('tui_code').value = btn.getAttribute('data-code');
+            document.getElementById('tui_sem').value = btn.getAttribute('data-semester');
+            document.getElementById('tui_student').value = btn.getAttribute('data-student');
+            document.getElementById('tui_credits').value = btn.getAttribute('data-credits');
+            document.getElementById('tui_amount').value = btn.getAttribute('data-amount');
+            document.getElementById('tui_status').value = btn.getAttribute('data-status');
+            
+            // Xử lý format ngày giờ cho ô datetime-local (bỏ phần giây và nano giây)
+            let dueStr = btn.getAttribute('data-due');
+            if(dueStr) {
+                document.getElementById('tui_due').value = dueStr.substring(0, 16);
+            }
+        }
+    </script>
+</body>
+</html>

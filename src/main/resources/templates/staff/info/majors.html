@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-on-surface">Quản lý Ngành</h2>
+                <p class="font-body-md text-on-surface-variant mt-xs">Hệ thống quản lý chương trình và tín chỉ.</p>
+            </div>
+            <button onclick="openModal(false)" class="bg-primary text-white px-lg py-2 rounded-lg font-label-md flex items-center gap-xs transition-colors shadow-md">
+                <span class="material-symbols-outlined">add</span> Thêm mới
+            </button>
+        </div>
+
+        <div class="flex border-b border-outline-variant mb-lg overflow-x-auto">
+            <a th:href="@{/staff/faculties}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-all whitespace-nowrap">Khoa</a>
+            <a th:href="@{/staff/majors}" class="px-md py-sm font-label-md text-primary border-b-2 border-primary transition-all whitespace-nowrap">Ngành</a>
+            <a th:href="@{/staff/students}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-all whitespace-nowrap">Sinh viên</a>
+            <a th:href="@{/staff/lecturers}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-all whitespace-nowrap">Giảng viên</a>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden">
+            <table class="w-full text-left border-collapse table-auto">
+                <thead>
+                    <tr class="bg-surface-container border-b border-outline-variant">
+                        <th class="p-md text-on-surface-variant w-16 text-center">STT</th>
+                        <th class="p-md text-on-surface-variant text-left">Tên Ngành</th>
+                        <th class="p-md text-on-surface-variant text-left">Khóa áp dụng</th>
+                        <th class="p-md text-on-surface-variant text-center">Tổng tín</th>
+                        <th class="p-md text-on-surface-variant text-left">Khoa/Viện</th>
+                        <th class="p-md text-on-surface-variant text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/50">
+                    <tr th:each="curr, iter : ${majors}" class="hover:bg-surface-container-lowest transition-colors">
+                        <td class="p-md text-center text-on-surface-variant" th:text="${iter.count}">1</td>
+                        <td class="p-md text-left">
+                            <div class="font-label-md text-on-surface" th:text="${curr.curriculumName}">Ngành</div>
+                            <div class="text-xs text-gray-400" th:text="${curr.curriculumCode}">Mã</div>
+                        </td>
+                        <td class="p-md text-left" th:text="${curr.applicableCohort}">K2023</td>
+                        <td class="p-md text-center font-bold text-[#021541]" th:text="${curr.totalCredits}">120</td>
+                        <td class="p-md text-left font-bold text-primary" th:text="${curr.faculty != null ? curr.faculty.facultyName : 'N/A'}">Khoa</td>
+                        <td class="p-md text-right">
+                            <div class="flex justify-end gap-2">
+                                <button type="button" th:data-id="${curr.id}" th:data-code="${curr.curriculumCode}" th:data-name="${curr.curriculumName}" th:data-major="${curr.majorName}" th:data-cohort="${curr.applicableCohort}" th:data-credits="${curr.totalCredits}" th:data-fac="${curr.faculty != null ? curr.faculty.id : ''}" onclick="editMajor(this)" class="p-1.5 hover:text-primary transition-all"><span class="material-symbols-outlined">edit</span></button>
+                                <a th:href="@{/staff/majors/delete(id=${curr.id})}" onclick="return confirm('Xác nhận xóa?')" class="p-1.5 hover:text-error"><span class="material-symbols-outlined">delete</span></a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="p-md border-t text-sm text-gray-500">Tổng cộng: <span th:text="${majors != null ? majors.size() : 0}">0</span> kết quả</div>
+        </div>
+    </main>
+
+    <div id="crudModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60" onclick="closeModal()"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 z-50 overflow-hidden relative border border-gray-200">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50"><h3 class="text-xl font-bold" id="modalTitle">Thêm dữ liệu</h3><button type="button" onclick="closeModal()"><span class="material-symbols-outlined">close</span></button></div>
+            <form th:action="@{/staff/majors/save}" method="post" class="p-6">
+                <input type="hidden" name="id" id="formId"/>
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-bold mb-1">Mã chương trình</label><input type="text" name="curriculumCode" id="maj_code" class="w-full border p-2 rounded-lg" required/></div>
+                    <div><label class="block text-sm font-bold mb-1">Tên ngành</label><input type="text" name="curriculumName" id="maj_name" class="w-full border p-2 rounded-lg" required/></div>
+                    <div><label class="block text-sm font-bold text-primary mb-1">Tên chuyên ngành (Bắt buộc)</label><input type="text" name="majorName" id="maj_major" class="w-full border border-primary p-2 rounded-lg focus:ring-2" required/></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-bold mb-1">Khóa học</label><input type="text" name="applicableCohort" id="maj_cohort" class="w-full border p-2 rounded-lg"/></div>
+                        <div><label class="block text-sm font-bold mb-1">Số tín chỉ</label><input type="number" name="totalCredits" id="maj_credits" class="w-full border p-2 rounded-lg"/></div>
+                    </div>
+                    <div><label class="block text-sm font-bold text-[#021541] mb-1">Khoa trực thuộc</label><select name="faculty.id" id="maj_fac" class="w-full border border-gray-300 p-2 rounded-lg font-bold text-blue-900"><option th:each="f : ${faculties}" th:value="${f.id}" th:text="${f.facultyName}"></option></select></div>
+                </div>
+                <div class="flex justify-end gap-3 pt-6 mt-6 border-t"><button type="button" onclick="closeModal()" class="px-6 py-2 border rounded-lg">Hủy</button><button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg font-bold shadow-md active:scale-95 transition-all">Lưu dữ liệu</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
+        function openModal(isEdit) { document.getElementById('crudModal').style.display = 'flex'; if(!isEdit) { document.getElementById('formId').value = ""; document.querySelector('form').reset(); } }
+        function editMajor(btn) {
+            openModal(true);
+            document.getElementById('formId').value = btn.getAttribute('data-id');
+            document.getElementById('maj_code').value = btn.getAttribute('data-code');
+            document.getElementById('maj_name').value = btn.getAttribute('data-name');
+            document.getElementById('maj_major').value = btn.getAttribute('data-major');
+            document.getElementById('maj_cohort').value = btn.getAttribute('data-cohort');
+            document.getElementById('maj_credits').value = btn.getAttribute('data-credits');
+            document.getElementById('maj_fac').value = btn.getAttribute('data-fac');
+        }
+    </script>
+</body>
+</html>

@@ -7,6 +7,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -38,6 +42,10 @@ public class Account {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @OneToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
+
     // --- CÁC HÀM GETTER VÀ SETTER ---
     // (Dùng để lấy và gán giá trị cho các biến)
 
@@ -64,4 +72,16 @@ public class Account {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Student getStudent() { return student; }
+    public void setStudent(Student student) { this.student = student; }
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-display-sm text-on-surface">Đợt Đăng ký Môn học</h2>
+                <p class="font-body-md text-body-md text-on-surface-variant mt-xs">Thiết lập thời gian và đối tượng được phép đăng ký môn học trực tuyến.</p>
+            </div>
+            <button onclick="openModal(false)" class="bg-primary text-white px-lg py-2 rounded-lg font-label-md flex items-center gap-xs shadow-md hover:bg-primary-container transition-all">
+                <span class="material-symbols-outlined">event_available</span> Mở đợt mới
+            </button>
+        </div>
+
+        <div class="flex border-b border-outline-variant mb-lg overflow-x-auto">
+            <a th:href="@{/staff/registration/courses}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary">Môn học</a>
+            <a th:href="@{/staff/registration/class-sections}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary">Lớp học phần</a>
+            <a th:href="@{/staff/registration/semesters}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary">Học kỳ</a>
+            <a th:href="@{/staff/registration/plans}" class="px-md py-sm font-label-md text-primary border-b-2 border-primary">Đợt đăng ký</a>
+            <a th:href="@{/staff/registration/results}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary">Kết quả ĐK</a>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden">
+            <table class="w-full text-left border-collapse table-auto">
+                <thead>
+                    <tr class="bg-surface-container border-b border-outline-variant">
+                        <th class="p-md text-on-surface-variant w-16 text-center text-xs font-bold uppercase">STT</th>
+                        <th class="p-md text-on-surface-variant text-left text-xs font-bold uppercase">Thông tin Đợt Đăng ký</th>
+                        <th class="p-md text-on-surface-variant text-left text-xs font-bold uppercase">Đối tượng (Khóa/Ngành)</th>
+                        <th class="p-md text-on-surface-variant text-left text-xs font-bold uppercase">Thời gian thực hiện</th>
+                        <th class="p-md text-on-surface-variant text-center text-xs font-bold uppercase">Trạng thái</th>
+                        <th class="p-md text-on-surface-variant text-right text-xs font-bold uppercase">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/50">
+                    <tr th:each="p, iter : ${plans}" class="hover:bg-surface-container-low transition-colors">
+                        <td class="p-md text-center text-on-surface-variant" th:text="${iter.count}">1</td>
+                        <td class="p-md">
+                            <div class="font-bold text-primary" th:text="${p.planName}">Đăng ký chính khóa</div>
+                            <div class="text-xs text-gray-500" th:text="${'Mã: ' + p.planCode + ' | ' + p.semester.semesterName}">Mã - Học kỳ</div>
+                        </td>
+                        <td class="p-md">
+                            <div class="text-sm font-medium" th:text="${'Khóa: ' + p.targetCohort}">Khóa</div>
+                            <div class="text-xs text-secondary font-bold" th:text="${p.curriculum.curriculumName}">Ngành học</div>
+                        </td>
+                        <td class="p-md text-sm">
+                            <div class="flex items-center gap-1"><span class="material-symbols-outlined text-xs text-green-600">play_circle</span> <span th:text="${#temporals.format(p.startTime, 'dd/MM/yyyy HH:mm')}">Bắt đầu</span></div>
+                            <div class="flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-xs text-red-600">stop_circle</span> <span th:text="${#temporals.format(p.endTime, 'dd/MM/yyyy HH:mm')}">Kết thúc</span></div>
+                        </td>
+                        <td class="p-md text-center">
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase" 
+                                  th:classappend="${p.planStatus == 'ACTIVE'} ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'"
+                                  th:text="${p.planStatus}">Status</span>
+                        </td>
+                        <td class="p-md text-right">
+                            <div class="flex justify-end gap-2">
+                                <button type="button" class="p-1.5 hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
+                                <button type="button" class="p-1.5 hover:text-error"><span class="material-symbols-outlined">delete</span></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(plans)}">
+                        <td colspan="6" class="p-10 text-center text-gray-500">Chưa có đợt đăng ký nào được thiết lập.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="crudModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60" onclick="closeModal()"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 z-50 overflow-hidden relative">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-primary">Thiết lập Đợt Đăng ký</h3>
+                <button onclick="closeModal()"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form th:action="@{/staff/registration/plans/save}" method="post" class="p-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Mã đợt kế hoạch</label>
+                        <input type="text" name="planCode" class="w-full border p-2 rounded-lg" placeholder="VD: REG_2024_1" required/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Tên đợt đăng ký</label>
+                        <input type="text" name="planName" class="w-full border p-2 rounded-lg" placeholder="VD: Đăng ký HK1" required/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Học kỳ</label>
+                        <select name="semester.id" class="w-full border p-2 rounded-lg">
+                            <option th:each="s : ${semesters}" th:value="${s.id}" th:text="${s.semesterName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Áp dụng cho Khóa</label>
+                        <input type="text" name="targetCohort" class="w-full border p-2 rounded-lg" placeholder="VD: K2023"/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Thời gian bắt đầu</label>
+                        <input type="datetime-local" name="startTime" class="w-full border p-2 rounded-lg" required/>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-bold mb-1">Thời gian kết thúc</label>
+                        <input type="datetime-local" name="endTime" class="w-full border p-2 rounded-lg" required/>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-bold mb-1 text-primary">Chương trình đào tạo (Ngành)</label>
+                        <select name="curriculum.id" class="w-full border border-primary p-2 rounded-lg">
+                            <option th:each="c : ${curriculums}" th:value="${c.id}" th:text="${c.curriculumName}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t">
+                    <button type="button" onclick="closeModal()" class="px-6 py-2 border rounded-lg">Hủy</button>
+                    <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg font-bold shadow-md">Lưu kế hoạch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() { document.getElementById('crudModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
+    </script>
+</body>
+</html>

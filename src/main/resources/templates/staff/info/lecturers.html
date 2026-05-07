@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div>
+                <h2 class="font-display-sm text-on-surface">Quản lý Giảng viên</h2>
+                <p class="font-body-md text-on-surface-variant mt-xs">Quản lý đội ngũ giảng dạy và thông tin khoa.</p>
+            </div>
+            <button onclick="openModal(false)" class="bg-primary text-white px-lg py-2 rounded-lg font-label-md flex items-center gap-xs shadow-md hover:bg-primary-container transition-all">
+                <span class="material-symbols-outlined">add</span> Thêm mới
+            </button>
+        </div>
+
+        <div class="flex border-b border-outline-variant mb-lg overflow-x-auto">
+            <a th:href="@{/staff/faculties}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-all whitespace-nowrap">Khoa</a>
+            <a th:href="@{/staff/majors}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-all whitespace-nowrap">Ngành</a>
+            <a th:href="@{/staff/students}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent hover:text-primary transition-all whitespace-nowrap">Sinh viên</a>
+            <a th:href="@{/staff/lecturers}" class="px-md py-sm font-label-md text-primary border-b-2 border-primary transition-all whitespace-nowrap">Giảng viên</a>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-sm">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-container-low font-label-md border-b border-outline-variant">
+                        <th class="p-md text-on-surface-variant">Mã GV</th>
+                        <th class="p-md text-on-surface-variant">Họ và tên</th>
+                        <th class="p-md text-on-surface-variant">Học hàm/vị</th>
+                        <th class="p-md text-on-surface-variant">Khoa trực thuộc</th>
+                        <th class="p-md text-on-surface-variant">Email</th>
+                        <th class="p-md text-on-surface-variant text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/50">
+                    <tr th:each="l : ${lecturers}" class="hover:bg-surface-container-lowest transition-colors">
+                        <td class="p-md font-bold text-primary" th:text="${l.lecturerCode}">GV001</td>
+                        <td class="p-md font-medium text-on-surface" th:text="${l.fullName}">Nguyễn Văn A</td>
+                        <td class="p-md text-on-surface-variant" th:text="${l.academicDegree}">Tiến sĩ</td>
+                        <td class="p-md text-on-surface-variant">
+                            <span th:text="${l.faculty != null ? l.faculty.facultyName : 'Chưa gán'}"></span>
+                        </td>
+                        <td class="p-md text-on-surface-variant" th:text="${l.institutionalEmail}">gv@school.edu.vn</td>
+                        <td class="p-md text-right">
+                            <div class="flex justify-end gap-2">
+                                <button type="button" th:data-id="${l.id}" th:data-code="${l.lecturerCode}" th:data-name="${l.fullName}" th:data-degree="${l.academicDegree}" th:data-faculty="${l.faculty != null ? l.faculty.id : ''}" th:data-email="${l.institutionalEmail}" onclick="editLecturer(this)" class="p-1.5 hover:text-primary transition-all"><span class="material-symbols-outlined">edit</span></button>
+                                <a th:href="@{/staff/lecturers/delete(id=${l.id})}" onclick="return confirm('Xác nhận xóa giảng viên này?')" class="p-1.5 hover:text-error transition-all"><span class="material-symbols-outlined">delete</span></a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="crudModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden relative">
+            <div class="p-6 border-b flex justify-between items-center bg-surface-container-low">
+                <h3 id="modalTitle" class="text-xl font-bold text-primary">Thêm Giảng viên mới</h3>
+                <button onclick="closeModal()" class="material-symbols-outlined hover:bg-black/10 rounded-full p-1">close</button>
+            </div>
+            <form th:action="@{/staff/lecturers/save}" method="post" class="p-6">
+                <input type="hidden" name="id" id="formId">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-1"><label class="block text-sm font-bold text-primary mb-1">Mã giảng viên</label><input type="text" name="lecturerCode" id="lec_code" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-primary outline-none"></div>
+                    <div class="col-span-1"><label class="block text-sm font-bold text-primary mb-1">Học vị</label><input type="text" name="academicDegree" id="lec_degree" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-primary outline-none"></div>
+                    <div class="col-span-2"><label class="block text-sm font-bold text-primary mb-1">Họ và tên</label><input type="text" name="fullName" id="lec_name" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-primary outline-none"></div>
+                    <div class="col-span-2"><label class="block text-sm font-bold text-primary mb-1">Email trường cấp</label><input type="email" name="institutionalEmail" id="lec_email" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-primary outline-none"></div>
+                    <div class="col-span-2"><label class="block text-sm font-bold text-primary mb-1">Khoa trực thuộc</label><select name="faculty.id" id="lec_fac" class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-primary outline-none" required><option value="">-- Chọn Khoa --</option><option th:each="f : ${faculties}" th:value="${f.id}" th:text="${f.facultyName}"></option></select></div>
+                </div>
+                <div class="flex justify-end gap-3 pt-6 mt-6 border-t"><button type="button" onclick="closeModal()" class="px-5 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-primary text-white px-5 py-2 rounded-lg font-bold hover:opacity-90 shadow-md">Lưu thông tin</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
+        function openModal(isEdit) { const modal = document.getElementById('crudModal'); modal.style.display = 'flex'; document.getElementById('modalTitle').innerText = isEdit ? "Cập nhật thông tin Giảng viên" : "Thêm Giảng viên mới"; if(!isEdit) { document.getElementById('formId').value = ""; document.querySelector('form').reset(); } }
+        function editLecturer(btn) {
+            openModal(true);
+            document.getElementById('formId').value = btn.getAttribute('data-id');
+            document.getElementById('lec_code').value = btn.getAttribute('data-code');
+            document.getElementById('lec_name').value = btn.getAttribute('data-name');
+            document.getElementById('lec_degree').value = btn.getAttribute('data-degree');
+            document.getElementById('lec_email').value = btn.getAttribute('data-email');
+            document.getElementById('lec_fac').value = btn.getAttribute('data-faculty');
+        }
+    </script>
+</body>
+</html>

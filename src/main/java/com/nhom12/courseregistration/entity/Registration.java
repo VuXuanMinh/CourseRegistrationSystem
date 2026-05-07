@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient; // BẮT BUỘC PHẢI CÓ DÒNG NÀY
 
 @Entity
 @Table(name = "registrations")
@@ -29,18 +30,31 @@ public class Registration {
     @Column(name = "registration_status")
     private String registrationStatus;
 
-    @Column(name = "registration_time")
+    // DÙNG @Transient ĐỂ SPRING BOOT BỎ QUA CỘT NÀY DƯỚI DATABASE
+    @Transient
     private LocalDateTime registrationTime;
 
-    // Getter và Setter
+    // --- Getter và Setter ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    
     public Student getStudent() { return student; }
     public void setStudent(Student student) { this.student = student; }
+    
     public ClassSection getSection() { return section; }
     public void setSection(ClassSection section) { this.section = section; }
+    
     public String getRegistrationStatus() { return registrationStatus; }
     public void setRegistrationStatus(String registrationStatus) { this.registrationStatus = registrationStatus; }
+    
     public LocalDateTime getRegistrationTime() { return registrationTime; }
     public void setRegistrationTime(LocalDateTime registrationTime) { this.registrationTime = registrationTime; }
+
+    public ClassSection getClassSection() {
+        return this.section; 
+    }
+
+    public void setClassSection(ClassSection classSection) {
+        this.section = classSection;
+    }
 }

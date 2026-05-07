@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html class="light" lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-body-md text-on-surface antialiased bg-background min-h-screen">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: header}"></div>
+
+    <main class="ml-sidebar_width pt-[88px] p-lg">
+        <div class="flex items-center justify-between mb-md">
+            <div><h2 class="font-display-sm text-on-surface">Quản lý Khoa</h2><p class="font-body-md text-on-surface-variant mt-xs">Hệ thống quản lý cơ cấu tổ chức.</p></div>
+            <button onclick="openModal(false)" class="bg-primary text-white px-lg py-2 rounded-lg font-label-md flex items-center gap-xs shadow-md"><span class="material-symbols-outlined">add</span> Thêm mới</button>
+        </div>
+
+        <div class="flex border-b border-outline-variant mb-lg overflow-x-auto">
+            <a th:href="@{/staff/faculties}" class="px-md py-sm font-label-md text-primary border-b-2 border-primary">Khoa</a>
+            <a th:href="@{/staff/majors}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent">Ngành</a>
+            <a th:href="@{/staff/students}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent">Sinh viên</a>
+            <a th:href="@{/staff/lecturers}" class="px-md py-sm font-label-md text-on-surface-variant border-b-2 border-transparent">Giảng viên</a>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant card-shadow overflow-hidden">
+            <table class="w-full text-left border-collapse table-auto">
+                <thead>
+                    <tr class="bg-surface-container border-b border-outline-variant">
+                        <th class="p-md text-on-surface-variant w-16 text-center">STT</th>
+                        <th class="p-md text-on-surface-variant text-left">Tên Khoa</th>
+                        <th class="p-md text-on-surface-variant text-left">Mã Khoa</th>
+                        <th class="p-md text-on-surface-variant text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/50">
+                    <tr th:each="fac, iter : ${faculties}" class="hover:bg-surface-container-lowest transition-colors">
+                        <td class="p-md text-center" th:text="${iter.count}">1</td>
+                        <td class="p-md text-left font-label-md text-on-surface" th:text="${fac.facultyName}">Tên Khoa</td>
+                        <td class="p-md text-left" th:text="${fac.facultyCode}">Mã</td>
+                        <td class="p-md text-right">
+                            <div class="flex justify-end gap-2">
+                                <button type="button" th:data-id="${fac.id}" th:data-code="${fac.facultyCode}" th:data-name="${fac.facultyName}" onclick="editFaculty(this)" class="p-1.5 hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
+                                <a th:href="@{/staff/faculties/delete(id=${fac.id})}" onclick="return confirm('Xóa?')" class="p-1.5 hover:text-error"><span class="material-symbols-outlined">delete</span></a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="crudModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60" onclick="closeModal()"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 z-50 overflow-hidden relative">
+            <form th:action="@{/staff/faculties/save}" method="post" class="p-6">
+                <input type="hidden" name="id" id="formId"/>
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-bold mb-1">Mã Khoa</label><input type="text" name="facultyCode" id="fac_code" class="w-full border p-2 rounded-lg" required/></div>
+                    <div><label class="block text-sm font-bold mb-1">Tên Khoa</label><input type="text" name="facultyName" id="fac_name" class="w-full border p-2 rounded-lg" required/></div>
+                </div>
+                <div class="flex justify-end gap-3 pt-6 mt-6 border-t"><button type="button" onclick="closeModal()" class="px-5 py-2 border rounded-lg">Hủy</button><button type="submit" class="bg-primary text-white px-5 py-2 rounded-lg font-bold">Lưu</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
+        function openModal(isEdit) { document.getElementById('crudModal').style.display = 'flex'; if(!isEdit) { document.getElementById('formId').value = ""; document.querySelector('form').reset(); } }
+        function editFaculty(btn) {
+            openModal(true);
+            document.getElementById('formId').value = btn.getAttribute('data-id');
+            document.getElementById('fac_code').value = btn.getAttribute('data-code');
+            document.getElementById('fac_name').value = btn.getAttribute('data-name');
+        }
+    </script>
+</body>
+</html>
