@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Đăng nhập - Hệ thống Quản lý Đăng ký môn học</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#390c00",
+                        "secondary-fixed": "#dee0ff",
+                        "on-surface": "#1b1b21",
+                        "primary-fixed": "#e0e0ff",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#1a237e",
+                        "on-background": "#1b1b21",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#efecf5",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "primary": "#000666",
+                        "outline-variant": "#c6c5d4",
+                        "outline": "#767683"
+                    },
+                    "fontFamily": {
+                        "label-bold": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased">
+
+<main class="flex-grow flex items-center justify-center p-container-padding md:p-10">
+    <div class="w-full max-w-5xl bg-surface-container-lowest rounded-[24px] shadow-[0_12px_24px_-12px_rgba(26,35,126,0.15)] overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+        
+        <!-- Cột trái: Hình ảnh giới thiệu -->
+        <div class="hidden md:block w-1/2 relative bg-primary-container overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-container to-primary z-10"></div>
+            <div class="relative z-20 h-full flex flex-col justify-center p-12 text-white">
+                <h1 class="font-headline-lg text-[28px] font-bold mb-6 drop-shadow-md tracking-wide">
+                    Chào mừng đến với hệ thống quản lý học tập.
+                </h1>
+                <p class="font-body-lg text-[16px] max-w-md drop-shadow-sm leading-relaxed text-gray-100">
+                    Nền tảng đồng bộ hóa dữ liệu học vụ, hỗ trợ đắc lực cho sinh viên và cán bộ giảng viên trong công tác quản lý và đào tạo.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Cột phải: Form Đăng nhập -->
+        <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-surface-container-lowest">
+            <div class="mb-8">
+                <h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Đăng nhập</h2>
+                <p class="font-body-md text-body-md text-on-surface-variant">Vui lòng chọn vai trò và nhập thông tin để tiếp tục.</p>
+            </div>
+
+            <!-- Tab chọn vai trò (Đã thêm ID và sự kiện onclick) -->
+            <div class="flex bg-surface-container rounded-lg p-1 mb-6" role="tablist">
+                <button id="tab-student" onclick="switchTab('STUDENT')" aria-selected="true" class="flex-1 py-2 px-4 rounded-md font-label-bold text-label-bold bg-surface-container-lowest text-primary shadow-sm ring-1 ring-black/5 transition-all" role="tab">
+                    Sinh viên
+                </button>
+                <button id="tab-staff" onclick="switchTab('STAFF')" aria-selected="false" class="flex-1 py-2 px-4 rounded-md font-label-bold text-label-bold text-on-surface-variant hover:text-on-surface transition-all" role="tab">
+                    Cán bộ
+                </button>
+            </div>
+
+            <!-- Khối hiển thị thông báo lỗi từ Spring Boot -->
+            <div th:if="${error}" class="mb-4 p-4 text-sm text-error bg-error-container rounded-lg flex items-center gap-2">
+                <span class="material-symbols-outlined">error</span>
+                <span th:text="${error}"></span>
+            </div>
+
+            <form class="space-y-6" th:action="@{/login}" method="post">
+                <!-- THÊM MỚI: Trường ẩn lưu vai trò đang chọn (mặc định là STUDENT) -->
+                <input type="hidden" id="selectedRole" name="role" value="STUDENT" />
+
+                <div>
+                    <label class="block font-label-bold text-label-bold text-on-surface mb-2" for="username">Tên đăng nhập</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">person</span>
+                        <input class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-shadow font-body-md text-body-md placeholder-outline" 
+                               id="username" name="username" placeholder="Nhập tên đăng nhập" type="text" required />
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block font-label-bold text-label-bold text-on-surface mb-2" for="password">Mật khẩu</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">lock</span>
+                        <input class="w-full pl-10 pr-10 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-shadow font-body-md text-body-md placeholder-outline" 
+                               id="password" name="password" placeholder="Nhập mật khẩu" type="password" required />
+                        <!-- Nút hiển thị mật khẩu tạm thời để type="button" -->
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant" type="button" onclick="togglePassword()">
+                            <span id="eye-icon" class="material-symbols-outlined">visibility_off</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input class="h-4 w-4 rounded border-outline-variant text-primary-container focus:ring-primary-container" id="remember-me" name="remember-me" type="checkbox"/>
+                        <label class="ml-2 block font-body-md text-body-md text-on-surface-variant" for="remember-me">Ghi nhớ đăng nhập</label>
+                    </div>
+                    <a class="font-label-bold text-label-bold text-primary-container hover:text-primary transition-colors" href="#">Quên mật khẩu?</a>
+                </div>
+                
+                <button class="w-full py-3 px-4 rounded-lg bg-primary-container text-on-primary font-label-bold text-label-bold hover:bg-primary transition-colors shadow-sm flex items-center justify-center gap-2" type="submit">
+                    Đăng nhập
+                    <span class="material-symbols-outlined text-sm">login</span>
+                </button>
+            </form>
+            
+        </div>
+    </div>
+</main>
+
+<!-- ĐOẠN SCRIPT XỬ LÝ SỰ KIỆN CLICK TAB VÀ ẨN/HIỆN MẬT KHẨU -->
+<script>
+    function switchTab(role) {
+        // Lấy các phần tử cần tương tác
+        const tabStudent = document.getElementById('tab-student');
+        const tabStaff = document.getElementById('tab-staff');
+        const roleInput = document.getElementById('selectedRole');
+
+        // Khai báo các class CSS khi nút đang ở trạng thái được chọn (Active) và không được chọn (Inactive)
+        const activeClasses = ['bg-surface-container-lowest', 'text-primary', 'shadow-sm', 'ring-1', 'ring-black/5'];
+        const inactiveClasses = ['text-on-surface-variant', 'hover:text-on-surface'];
+
+        if (role === 'STUDENT') {
+            roleInput.value = 'STUDENT'; // Cập nhật dữ liệu ngầm cho form
+            
+            // Xóa class cũ và thêm class mới cho tab Sinh viên
+            tabStudent.classList.remove(...inactiveClasses);
+            tabStudent.classList.add(...activeClasses);
+            tabStudent.setAttribute('aria-selected', 'true');
+            
+            // Xóa class cũ và thêm class mới cho tab Cán bộ
+            tabStaff.classList.remove(...activeClasses);
+            tabStaff.classList.add(...inactiveClasses);
+            tabStaff.setAttribute('aria-selected', 'false');
+            
+        } else if (role === 'STAFF') {
+            roleInput.value = 'STAFF'; // Cập nhật dữ liệu ngầm cho form
+            
+            // Xóa class cũ và thêm class mới cho tab Cán bộ
+            tabStaff.classList.remove(...inactiveClasses);
+            tabStaff.classList.add(...activeClasses);
+            tabStaff.setAttribute('aria-selected', 'true');
+            
+            // Xóa class cũ và thêm class mới cho tab Sinh viên
+            tabStudent.classList.remove(...activeClasses);
+            tabStudent.classList.add(...inactiveClasses);
+            tabStudent.setAttribute('aria-selected', 'false');
+        }
+    }
+
+    // Tiện tay mình làm thêm cho bạn hàm ẩn/hiện mật khẩu khi bấm vào icon con mắt nhé
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.textContent = 'visibility';
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.textContent = 'visibility_off';
+        }
+    }
+</script>
+
+</body>
+</html>
