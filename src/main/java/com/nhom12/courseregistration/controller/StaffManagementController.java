@@ -26,7 +26,7 @@ public class StaffManagementController {
     @Autowired private FacultyService facultyService;
     @Autowired private LecturerService lecturerService;
     @Autowired private CurriculumService curriculumService;
-    @Autowired private SystemLogService logService; // Đã thêm
+    @Autowired private SystemLogService logService;
 
     private void loadAllData(Model model) {
         model.addAttribute("faculties", facultyService.getAllFaculties());

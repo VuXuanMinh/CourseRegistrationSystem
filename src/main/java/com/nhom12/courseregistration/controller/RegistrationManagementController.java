@@ -33,7 +33,7 @@ public class RegistrationManagementController {
     @Autowired private RegistrationService registrationService;
     @Autowired private CurriculumService curriculumService;
     @Autowired private LecturerService lecturerService;
-    @Autowired private SystemLogService logService; // Đã thêm
+    @Autowired private SystemLogService logService; 
 
     private void loadBaseData(Model model) {
         model.addAttribute("semesters", semesterService.getAllSemesters());

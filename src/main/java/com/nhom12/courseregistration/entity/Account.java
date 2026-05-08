@@ -46,8 +46,7 @@ public class Account {
     @JoinColumn(name = "student_id")
     private Student student;
 
-    // --- CÁC HÀM GETTER VÀ SETTER ---
-    // (Dùng để lấy và gán giá trị cho các biến)
+
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

@@ -28,7 +28,7 @@ public class TuitionInvoice {
     @Column(name = "total_credits", nullable = false)
     private Integer totalCredits;
 
-    // BigDecimal dùng để lưu tiền tệ một cách chính xác nhất trong Java
+    
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
@@ -53,7 +53,7 @@ public class TuitionInvoice {
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
 
-    // --- GETTER VÀ SETTER ---
+ 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

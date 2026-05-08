@@ -110,7 +110,7 @@ public class ClassSection {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Tự động cập nhật thời gian khi có thay đổi
+   
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();

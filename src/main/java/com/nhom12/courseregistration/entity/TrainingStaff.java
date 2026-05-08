@@ -45,7 +45,7 @@ public class TrainingStaff {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Khóa ngoại: 1 Giáo vụ có 1 Tài khoản đăng nhập
+  
     @OneToOne
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private Account account;

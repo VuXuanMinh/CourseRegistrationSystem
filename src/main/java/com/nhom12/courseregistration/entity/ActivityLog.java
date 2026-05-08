@@ -11,7 +11,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "activity_logs") // Đảm bảo tên bảng khớp với DB
+@Table(name = "activity_logs") 
 public class ActivityLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +35,7 @@ public class ActivityLog {
     @Column(name = "ip_address")
     private String ipAddress;
 
-    // --- GETTER & SETTER ---
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getUserId() { return userId; }

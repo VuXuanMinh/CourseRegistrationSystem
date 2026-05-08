@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpSession;
 public class SystemLogService {
     @Autowired private ActivityLogRepository logRepository;
     @Autowired private HttpSession session;
-    @Autowired private HttpServletRequest request; // Dùng để lấy IP
+    @Autowired private HttpServletRequest request; 
 
     public void logAction(String action, String details) {
         ActivityLog log = new ActivityLog();
@@ -29,7 +29,7 @@ public class SystemLogService {
         
         log.setAction(action);
         log.setDetailData(details);
-        log.setIpAddress(request.getRemoteAddr()); // Lấy IP người dùng
+        log.setIpAddress(request.getRemoteAddr()); 
         
         logRepository.save(log);
     }

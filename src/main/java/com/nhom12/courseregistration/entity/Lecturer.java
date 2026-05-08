@@ -45,12 +45,12 @@ public class Lecturer {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Khóa ngoại: Nhiều giảng viên thuộc về 1 Khoa
+    
     @ManyToOne
     @JoinColumn(name = "faculty_id")
     private Faculty faculty;
 
-    // --- CÁC HÀM GETTER VÀ SETTER ---
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

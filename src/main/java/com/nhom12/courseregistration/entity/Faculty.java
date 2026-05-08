@@ -31,7 +31,7 @@ public class Faculty {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // --- GETTER VÀ SETTER ---
+    
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

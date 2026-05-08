@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpSession;
 public class LoginController {
 
     @Autowired private AccountService accountService;
-    @Autowired private SystemLogService logService; // Đã thêm
+    @Autowired private SystemLogService logService; 
 
     @GetMapping("/login")
     public String showLoginPage() {
@@ -41,7 +41,7 @@ public class LoginController {
 
             session.setAttribute("loggedInUser", account);
 
-            // GHI LOG ĐĂNG NHẬP
+           
             logService.logAction("LOGIN", "Người dùng [" + username + "] đã đăng nhập thành công.");
 
             if ("STAFF".equalsIgnoreCase(account.getRole())) {
@@ -58,7 +58,7 @@ public class LoginController {
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        // GHI LOG ĐĂNG XUẤT (Ghi trước khi session bị xóa)
+        
         logService.logAction("LOGOUT", "Người dùng đã đăng xuất khỏi hệ thống.");
         
         session.invalidate(); 

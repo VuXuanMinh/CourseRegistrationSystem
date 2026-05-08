@@ -7,5 +7,5 @@ import com.nhom12.courseregistration.entity.Faculty;
 
 @Repository
 public interface FacultyRepository extends JpaRepository<Faculty, Long> {
-    // Kế thừa sẵn các hàm tìm kiếm cơ bản (findAll, findById...)
+    
 }

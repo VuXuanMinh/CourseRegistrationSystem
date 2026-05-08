@@ -7,5 +7,5 @@ import com.nhom12.courseregistration.entity.Registration;
 
 @Repository
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
-    // Tạm thời dùng các hàm mặc định của JPA (findAll, findById, save, delete)
+    
 }

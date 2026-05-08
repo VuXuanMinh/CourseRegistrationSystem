@@ -26,7 +26,7 @@ public class RegistrationPlanCourse {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // Khóa ngoại
+   
     @ManyToOne
     @JoinColumn(name = "plan_id", nullable = false)
     private RegistrationPlan plan;
@@ -35,7 +35,6 @@ public class RegistrationPlanCourse {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    // --- GETTER VÀ SETTER ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

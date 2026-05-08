@@ -10,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient; // BẮT BUỘC PHẢI CÓ DÒNG NÀY
+import jakarta.persistence.Transient; 
 
 @Entity
 @Table(name = "registrations")
@@ -30,7 +30,7 @@ public class Registration {
     @Column(name = "registration_status")
     private String registrationStatus;
 
-    // DÙNG @Transient ĐỂ SPRING BOOT BỎ QUA CỘT NÀY DƯỚI DATABASE
+    
     @Transient
     private LocalDateTime registrationTime;
 

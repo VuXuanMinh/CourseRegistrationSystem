@@ -29,7 +29,7 @@ public class Semester {
     @Column(name = "academic_year", nullable = false, length = 20)
     private String academicYear;
 
-    // Chú ý: Ngày tháng năm dùng LocalDate (không có giờ phút)
+    
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
@@ -45,7 +45,7 @@ public class Semester {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // --- GETTER VÀ SETTER ---
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

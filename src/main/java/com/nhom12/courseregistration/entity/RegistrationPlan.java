@@ -45,7 +45,7 @@ public class RegistrationPlan {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Khóa ngoại
+    
     @ManyToOne
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
@@ -54,7 +54,7 @@ public class RegistrationPlan {
     @JoinColumn(name = "curriculum_id", nullable = false)
     private Curriculum curriculum;
 
-    // --- GETTER VÀ SETTER ---
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -93,7 +93,7 @@ public class RegistrationPlan {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Tự động cập nhật thời gian khi có thay đổi
+   
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();

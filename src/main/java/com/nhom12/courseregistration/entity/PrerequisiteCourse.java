@@ -27,12 +27,12 @@ public class PrerequisiteCourse {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Môn học chính
+    
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    // Môn học điều kiện (môn tiên quyết)
+
     @ManyToOne
     @JoinColumn(name = "prerequisite_course_id", nullable = false)
     private Course prerequisiteCourse;

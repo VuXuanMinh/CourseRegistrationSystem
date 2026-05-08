@@ -21,7 +21,7 @@ public class TuitionManagementController {
     @Autowired private TuitionInvoiceService tuitionService;
     @Autowired private StudentService studentService;
     @Autowired private SemesterService semesterService;
-    @Autowired private SystemLogService logService; // Đã thêm
+    @Autowired private SystemLogService logService;
 
     private void loadBaseData(Model model) {
         model.addAttribute("students", studentService.getAllStudents());

@@ -47,24 +47,21 @@ public class Student {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // --- CÁC MỐI QUAN HỆ (KHÓA NGOẠI) ---
-
-    // Nhiều sinh viên thuộc về một Khoa
     @ManyToOne
     @JoinColumn(name = "faculty_id")
     private Faculty faculty;
 
-    // Nhiều sinh viên học chung một Chương trình đào tạo
+    
     @ManyToOne
     @JoinColumn(name = "curriculum_id", nullable = false)
     private Curriculum curriculum;
 
-    // Mỗi sinh viên có một tài khoản duy nhất (Ràng buộc UNIQUE)
+    
     @OneToOne
     @JoinColumn(name = "account_id", unique = true)
     private Account account;
 
-    // --- GETTER VÀ SETTER ---
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

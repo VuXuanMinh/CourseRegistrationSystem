@@ -10,6 +10,6 @@ import com.nhom12.courseregistration.entity.ActivityLog;
 @Repository
 public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> {
     
-    // ĐÃ SỬA: Đổi CreatedAt thành ActionTime
+
     List<ActivityLog> findAllByOrderByActionTimeDesc();
 }

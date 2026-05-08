@@ -9,9 +9,9 @@ import com.nhom12.courseregistration.entity.TuitionInvoice;
 
 @Repository
 public interface TuitionInvoiceRepository extends JpaRepository<TuitionInvoice, Long> {
-    // Tìm kiếm hóa đơn theo mã sinh viên (phục vụ chức năng lọc)
+    
     List<TuitionInvoice> findByStudent_StudentCode(String studentCode);
     
-    // Tìm kiếm theo học kỳ
+    
     List<TuitionInvoice> findBySemester_Id(Long semesterId);
 }

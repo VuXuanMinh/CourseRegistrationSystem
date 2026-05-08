@@ -81,13 +81,12 @@ public class CourseOfferingPlan {
 
     public Course getCourse() { return course; }
     public void setCourse(Course course) { this.course = course; }
-    // Tự động gán thời gian khi tạo mới
+    
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Tự động cập nhật thời gian khi có thay đổi
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();

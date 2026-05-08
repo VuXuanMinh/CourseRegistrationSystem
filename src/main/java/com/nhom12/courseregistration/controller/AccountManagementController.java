@@ -35,7 +35,7 @@ public class AccountManagementController {
         }
         accountRepository.save(account);
         
-        // GHI LOG
+        
         logService.logAction("UPDATE", "Đã lưu thông tin tài khoản: " + account.getUsername());
         
         return "redirect:/staff/accounts";
@@ -45,7 +45,7 @@ public class AccountManagementController {
     public String deleteAccount(@RequestParam("id") Long id) {
         accountRepository.deleteById(id);
         
-        // GHI LOG
+    
         logService.logAction("DELETE", "Đã xóa/khóa tài khoản có ID: " + id);
         
         return "redirect:/staff/accounts";
